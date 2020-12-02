@@ -10,17 +10,15 @@ public:
 	double** pp; //pressure
 	double dx, dy;
 	double** ustar, ** vstar;
-	double** ustar2, ** vstar2;
 
 	static double Re; //Reynold number
-	double Hx_old; //n-1 time step convective term to update u;
-	double Hx_new; //n time step convective term to update u;
-	double Hy_old; //n-1 time step convective term to update v;
-	double Hy_new; //n time step convective term to update v;
+	double** Hx; //n-1 time step convective term to update u;
+	double** Hy; //n-1 time step convective term to update v;
 
 	double R = 0.05; //jet radius
 	static double T; //Simulation time
 	static double dt; //Simulation timestep
+	double alpha;
 	
 public:
 	Flow();
@@ -33,6 +31,17 @@ public:
 	void updateFlow();
 	double getHx(int i_, int j_); //get convection term
 	double getHy(int i_, int j_); //get convection term
+
+	void getustar(); //return delta ustar as a colume vector
+	void getvstar(); //return delta vstar as a colume vector
+
+	double* getustar2(int j); //return delta ustar2 as a colume vector
+	double* getvstar2(); //return delta vstar2 as a colume vector
+
+	void getuu();
+	void getvv();
+	void getpp();
+
 };
 
 #endif

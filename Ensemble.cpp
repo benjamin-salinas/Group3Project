@@ -4,11 +4,13 @@ Ensemble::Ensemble(Flow* flow_)
 {
 	flow = flow_;
 	dt = Flow::dt;
+	dx = flow_->dx;
+	dy = flow_->dy;
 }
 
 Ensemble::~Ensemble()
 {
-
+	delete flow;
 }
 
 void Ensemble::updateEnsemble()
@@ -58,12 +60,28 @@ double Ensemble::Runge_Kutta(double q)
 
 double Ensemble::getVx(Particle P_)
 {
+	int ix = P_.x / dx;
+	int iy = (P_.y - dy / 2.) / dy;
 
+	//intepolate to get the velocity in the field
+	double temp1 = flow->u(ix, iy) +
+		(P_.x - ix * dx) / dx * (flow->u(ix, iy) + flow->u(ix + 1, iy));
+	double temp2 = flow->u(ix, iy + 1) +
+		(P_.x - ix * dx) / dx * (flow->u(ix, iy + 1) + flow->u(ix + 1, iy + 1));
+	return temp1 + (temp2 - temp1) * (P_.y - iy * dy - dy / 2);
 }
 
 double Ensemble::getVy(Particle P_)
 {
+	int ix = (P_.x - dx / 2.) / dx;
+	int iy = P_.y / dy;
 
+	//intepolate to get the velocity in the field
+	double temp1 = flow->v(ix, iy) +
+		(P_.y - iy * dy) / dy * (flow->v(ix, iy) + flow->v(ix, iy + 1));
+	double temp2 = flow->v(ix + 1, iy) +
+		(P_.y - iy * dy) / dy * (flow->v(ix + 1, iy) + flow->v(ix + 1, iy + 1));
+	return temp1 + (temp2 - temp1) * (P_.x - ix * dx - dx / 2);
 }
 
 void Ensemble::particlecheck()

@@ -15,7 +15,7 @@ class Ensemble
 {
 public:
 	Flow* flow;
-	double dt;
+	double dt, dx, dy;
 	vector<Particle> P;
 	static double St; //Stokes number;
 	static double m_in; //Particle inlet mass flow rate;
