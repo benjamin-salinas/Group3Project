@@ -1,4 +1,6 @@
+#include <iostream>
 #include "Flow.h"
+#include "Ensemble.h"
 
 using namespace std;
 
@@ -20,16 +22,27 @@ double Flow::dt = 0.001;
 //Reynold number
 double Flow::Re = 1.;
 
+//Stokes number
+double Ensemble::St = 1.;
+
+//Mass flow rate
+double Ensemble::m_in = 1000;
+
 int main()
 {
 	Flow* flow = new Flow;
+	flow->updateFlow();
+	/*
 	double t = 0.;
 	while (t < Flow::T)
 	{
-		flow->updateFlow;
+		flow->updateFlow();
 
 
 		t += Flow::dt;
+		if ((int)(t / Flow::dt) % 1 == 0) cout << "Time: " << t << endl;
+	
 	}
+*/
 	return 0;
 }

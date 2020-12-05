@@ -36,7 +36,7 @@ public:
 	void getvstar(); //return delta vstar as a colume vector
 
 	double* getustar2(int j); //return delta ustar2 as a colume vector
-	double* getvstar2(); //return delta vstar2 as a colume vector
+	double* getvstar2(int j); //return delta vstar2 as a colume vector
 
 	void getuu();
 	void getvv();

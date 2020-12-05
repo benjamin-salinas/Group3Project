@@ -16,7 +16,7 @@ class Ensemble
 public:
 	Flow* flow;
 	double dt, dx, dy;
-	vector<Particle> P;
+	vector<Particle*> P;
 	static double St; //Stokes number;
 	static double m_in; //Particle inlet mass flow rate;
 	int n_in; //Particle inlet number per time step;
@@ -32,8 +32,8 @@ public:
 	void particlecheck(); //remove particle leaving the domain
 
 	double Runge_Kutta(double q);
-	double getVx(Particle P_);
-	double getVy(Particle P_);
+	double getVx(Particle* P_);
+	double getVy(Particle* P_);
 
 	inline double getuleftBC(double y_)
 	{
