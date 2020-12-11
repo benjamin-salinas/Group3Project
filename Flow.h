@@ -10,6 +10,7 @@ public:
 	double** pp; //pressure
 	double dx, dy;
 	double** ustar, ** vstar;
+	double** ustar2, ** vstar2;
 
 	static double Re; //Reynold number
 	double** Hx; //n-1 time step convective term to update u;
@@ -35,8 +36,8 @@ public:
 	void getustar(); //return delta ustar as a colume vector
 	void getvstar(); //return delta vstar as a colume vector
 
-	double* getustar2(int j); //return delta ustar2 as a colume vector
-	double* getvstar2(int j); //return delta vstar2 as a colume vector
+	void getustar2(); //return delta ustar2 as a colume vector
+	void getvstar2(); //return delta vstar2 as a colume vector
 
 	void getuu();
 	void getvv();

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Ensemble.h"
 
 Ensemble::Ensemble(Flow* flow_)
@@ -6,7 +7,7 @@ Ensemble::Ensemble(Flow* flow_)
 	dt = Flow::dt;
 	dx = flow_->dx;
 	dy = flow_->dy;
-
+	n_in = m_in * dt;
 }
 
 Ensemble::~Ensemble()
@@ -21,6 +22,7 @@ void Ensemble::updateEnsemble()
 	particleinsert();
 	Runge_Kutta_explicit();
 	particlecheck();
+	//cout << "current particles number: " << P.size() << endl;
 }
 
 void Ensemble::particleinsert()
