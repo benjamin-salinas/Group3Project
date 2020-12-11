@@ -7,7 +7,7 @@ Ensemble::Ensemble(Flow* flow_)
 	dt = Flow::dt;
 	dx = flow_->dx;
 	dy = flow_->dy;
-	n_in = m_in * dt;
+	n_in = 0;
 }
 
 Ensemble::~Ensemble()
@@ -18,7 +18,17 @@ Ensemble::~Ensemble()
 void Ensemble::updateEnsemble()
 {
 	srand(time(0) + rand());
-	n_in = m_in * dt;
+	
+	double ntemp = m_in * dt;
+	cout << "random" << ntemp << endl;
+	if (ntemp < 1)
+	{
+		double ran = 1. * rand() / RAND_MAX;
+		cout << "random" << ran << endl;
+		if (ran <= ntemp) n_in = 1;
+		else n_in = 0;
+	}
+	else n_in = m_in * dt;
 	particleinsert();
 	Runge_Kutta_explicit();
 	particlecheck();
@@ -46,6 +56,7 @@ void Ensemble::Runge_Kutta_explicit()
 	{
 		P[j]->x += Runge_Kutta(P[j]->u);
 		P[j]->y += Runge_Kutta(P[j]->v);
+		if (P[j]->x > Mesh::Lx || P[j]->y > Mesh::Ly || P[j]->y < 0. || P[j]->x < 0.) continue;
 		P[j]->u += Runge_Kutta(1. / St * (getVx(P[j]) - P[j]->u));
 		P[j]->v += Runge_Kutta(1. / St * (getVy(P[j]) - P[j]->v));
 	}

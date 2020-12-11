@@ -16,7 +16,7 @@ int Mesh::Nx = 128;
 int Mesh::Ny = 64;
 
 //Simulation time
-double Flow::T =3.050;
+double Flow::T =2.500;
 
 //Time step
 double Flow::dt = 0.001;
@@ -28,7 +28,7 @@ double Flow::Re = 10000.;
 double Ensemble::St = 1.;
 
 //Mass flow rate
-double Ensemble::m_in = 2000;
+double Ensemble::m_in = 750;
 
 int main()
 {
@@ -66,8 +66,8 @@ int main()
 					ensemble->P[i]->v << endl;
 				
 			pout.close();
-		t += Flow::dt;
-		if ((int)(t / Flow::dt) % 1 == 0) cout << "Time: " << t << endl;
+			t += Flow::dt;
+			if ((int)(t / Flow::dt) % 1 == 0) cout << "Time: " << t << endl;
 	}
 	
 
