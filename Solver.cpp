@@ -100,3 +100,77 @@ double** Solver::SOR(double** Ae, double** Aw, double** An, double** As, double*
 	cout << tt << endl;
 	return ss;
 }
+
+double** Solver::CG(double** Ae, double** Aw, double** An, double** As, double** Ap, double** rhs, int Nxx, int Nyy)
+{
+	double** dd = new double* [Nxx];
+	double** epsilon = new double* [Nxx];
+	double tol = 1e-7;
+	int k = 0, i1, i2, j1, j2;
+	int tt = 0;
+	for (int i = 0; i < Nxx; i++)
+	{
+		ss[i] = new double[Nyy];
+		dd[i] = new double[Nyy];
+		epsilon[i] = new double[Nyy];
+		for (int j = 0; j < Nyy; j++)
+		{
+			epsilon[i][j] = 0;
+			ss[i][j] = 0;
+		}
+	}
+	double rho = 0.0, rho_old, alpha;
+	for (int i = 0; i < Nxx; i++)
+		for (int j = 0; j < Nyy; j++)
+			rho += rhs[i][j] * rhs[i][j];
+	while (sqrt(rho) > tol&& tt <= 100000)
+	{
+		k++;
+		for (int i = 0; i < Nxx; i++)
+			for (int j = 0; j < Nyy; j++)
+			{
+				if (k == 1)
+					dd[i][j] = rhs[i][j];
+				else
+					dd[i][j] = rhs[i][j] + rho / rho_old * dd[i][j];
+			}
+		alpha = 0;
+		for (int i = 0; i < Nxx; i++)
+			for (int j = 0; j < Nyy; j++)
+			{
+				i1 = i - 1;
+				if (i1 == -1) i1 = 0;
+				i2 = i + 1;
+				if (i2 == Nxx) i2 = Nxx - 1;
+				j1 = j - 1;
+				if (j1 == -1) j1 = 0;
+				j2 = j + 1;
+				if (j2 == Nyy) j2 = Nyy - 1;
+				epsilon[i][j] = Ap[i][j] * dd[i][j] + Aw[i][j] * dd[i1][j] + Ae[i][j] * dd[i2][j]
+					+ As[i][j] * dd[i][j1] + An[i][j] * dd[i][j2];
+				alpha += epsilon[i][j] * dd[i][j];
+			}
+		alpha = rho / alpha;
+		for (int i = 0; i < Nxx; i++)
+			for (int j = 0; j < Nyy; j++)
+			{
+				ss[i][j] += alpha * dd[i][j];
+				rhs[i][j] -= alpha * epsilon[i][j];
+			}
+		rho_old = rho;
+		rho = 0.0;
+		for (int i = 0; i < Nxx; i++)
+			for (int j = 0; j < Nyy; j++)
+				rho += rhs[i][j] * rhs[i][j];
+		tt++;
+		//if (tt >= 30000)
+		//cout << sum << endl;
+	}
+	for (int i = 0; i < Nxx; i++) delete[] dd[i];
+	for (int i = 0; i < Nxx; i++) delete[] epsilon[i];
+	delete[] dd;
+	delete[] epsilon;
+	cout << tt << endl;
+	return ss;
+	return 0;
+}

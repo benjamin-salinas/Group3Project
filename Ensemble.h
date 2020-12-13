@@ -23,6 +23,8 @@ public:
 
 	double R = 0.05;
 
+	static bool restartensemble; //switch to use restart data
+
 public:
 	Ensemble(Flow* flow_);
 	~Ensemble();
@@ -41,6 +43,7 @@ public:
 	}
 
 	void writeRestart();
+	void readRestart();
 };
 
 #endif

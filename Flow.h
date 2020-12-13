@@ -24,6 +24,9 @@ public:
 	double alpha;
 
 	int count = 0;
+	double L2_D;
+
+	static bool restartflow; //switch to use restart data
 	
 public:
 	Flow();

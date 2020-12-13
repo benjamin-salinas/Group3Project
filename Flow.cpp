@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include<sstream>
+#include<iomanip>
 
 using namespace std;
 
@@ -85,8 +86,10 @@ Flow::Flow()
 		vstar2[j] = new double[Mesh::Nx];
 	}
 
-	//uncomment to read restart data
-	//readRestart();
+	if (restartflow == true) readRestart(); 
+
+	//cout <<"uu: "<< setprecision(8) << uu[2][0] << endl;
+	//cout << "vv: " << vv[0][0] << endl;
 }
 
 Flow::~Flow() //Ning delete?
@@ -119,8 +122,8 @@ double Flow::u(int i_, int j_)
 	if (j_ == -1) j_ = 0;
 	if (j_ == Mesh::Ny) j_ = Mesh::Ny - 1;
 	if (i_ == Mesh::Nx + 1) i_ = Mesh::Nx - 1;
-	if (uu[i_][j_] < 0) uu[i_][j_] = 0.;
-	if (uu[i_][j_] > 2) uu[i_][j_] = 2.;
+	//if (uu[i_][j_] < 0) uu[i_][j_] = 0.;
+	if (uu[i_][j_] > 2) uu[i_][j_] = 1.1;
 	if (i_ == 0)
 		return exp(-(mesh->yc[j_] - 0.5) * (mesh->yc[j_] - 0.5) / R / R);
 		//return 0.01;
@@ -162,31 +165,30 @@ void Flow::updateFlow()
 		getustar();
 		getvstar();
 		count++;
-		//if (count <= 2000)
-		{
-			//Correct for mass conservation Ning
-					double sum1 = 0., sum2 = 0., kk, mm;
-					for (int j = 0; j < Mesh::Ny; j++)
-					{
-						sum1 += ustar[0][j];
-						sum2 += ustar[Mesh::Nx][j];
-					}
-					//cout << ustar[40][0] << " " << ustar[40][63] << " " << vstar[52][1] << " " << vstar[52][62] << endl;
-					//kk = sum1 - sum2;
-					mm = (sum1 + 1e-100) / (sum2 + 1e-100);
-
-					for (int j = 0; j < Mesh::Ny; j++)
-					{
-						ustar[Mesh::Nx][j] = mm * ustar[Mesh::Nx][j];
-					//ustar[Mesh::Nx][j] = kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
-						//ustar[Mesh::Nx][j] = kk / Mesh::Ny + ustar[Mesh::Nx][j];
-						//if (kk > 0)
-						//	ustar[Mesh::Nx][j] = kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
-						//else
-						//	ustar[Mesh::Nx][j] = -kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
-					//	cout << j << " " << ustar[Mesh::Nx][j] << " " << ustar[Mesh::Nx - 1][j] << endl;
-		}
-		}
+		
+		//Correct for mass conservation Ning
+		double sum1 = 0., sum2 = 0., kk, mm;
+		L2_D = 0.;
+			for (int j = 0; j < Mesh::Ny; j++)
+			{
+				sum1 += ustar[0][j];
+				sum2 += ustar[Mesh::Nx][j];
+			}
+			//cout << ustar[40][0] << " " << ustar[40][63] << " " << vstar[52][1] << " " << vstar[52][62] << endl;
+			//kk = sum1 - sum2;
+			mm = (sum1 + 1e-100) / (sum2 + 1e-100);
+			for (int j = 0; j < Mesh::Ny; j++)
+			{
+				ustar[Mesh::Nx][j] = mm * ustar[Mesh::Nx][j];
+			//ustar[Mesh::Nx][j] = kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
+				//ustar[Mesh::Nx][j] = kk / Mesh::Ny + ustar[Mesh::Nx][j];
+				//if (kk > 0)
+				//	ustar[Mesh::Nx][j] = kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
+				//else
+				//	ustar[Mesh::Nx][j] = -kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
+			//	cout << j << " " << ustar[Mesh::Nx][j] << " " << ustar[Mesh::Nx - 1][j] << endl;
+			}
+		
 		
 		
 		//Step 2
@@ -196,6 +198,11 @@ void Flow::updateFlow()
 		getuu();
 		getvv();
 
+		for (int i = 0; i < Mesh::Nx; i++)
+			for (int j = 0; j < Mesh::Ny; j++)
+				L2_D = L2_D + ((uu[i + 1][j] - uu[i][j]) / dx + (vv[i][j + 1] - vv[i][j]) / dy) *
+				((uu[i + 1][j] - uu[i][j]) / dx + (vv[i][j + 1] - vv[i][j]) / dy);
+		cout << "L2 norm " << sqrt(L2_D) << endl;
 }
 
 double Flow::getHx(int i_, int j_)
@@ -494,7 +501,7 @@ void Flow::writeRestart()
 	for (int i = 0; i <= Mesh::Nx; i++)
 		for (int j = 0; j < Mesh::Ny; j++)
 		{
-			restartuu <<  uu[i][j]  << endl;
+			restartuu  << uu[i][j] << endl;
 		}
 	restartuu.close();
 
@@ -512,7 +519,7 @@ void Flow::readRestart()
 {
 	//count number of rows in the file
 	ifstream file;
-	file.open("restartuu", ios::in);
+	file.open("restartuu.csv", ios::in);
 
 	int n = 0;
 	string temp;
@@ -520,18 +527,20 @@ void Flow::readRestart()
 		n++;
 		//cout << "temp:" << temp << endl;
 	}
-	file.close();
 	int LINES = n;
-
+	cout << "n:" << LINES << endl;
+	file.close();
+	file.open("restartuu.csv", ios::in);
 	for (int row = 0; row < LINES; row++) {
 
 		string line;
 		getline(file, line);
 		stringstream iss(line);
 		string val;
-		int ii = row % 129;
-		int jj = row / 129;
-
+		
+		int ii = row % Mesh::Nx;
+		int jj = row / Mesh::Nx;
+		
 			getline(iss, val, ',');
 
 			stringstream convertor(val);
@@ -539,13 +548,15 @@ void Flow::readRestart()
 			double inv;
 			convertor >> inv;
 			uu[ii][jj] = inv;
+			//cout << "u: " << uu[ii][jj] << endl;
+		
 	}
 	file.close();
 
 
 	//count number of rows in the file
 	ifstream file2;
-	file.open("restartvv", ios::in);
+	file2.open("restartvv.csv", ios::in);
 
 	n = 0;
 	string temp2;
@@ -553,17 +564,17 @@ void Flow::readRestart()
 		n++;
 		//cout << "temp:" << temp << endl;
 	}
-	file2.close();
 	LINES = n;
-
+	file2.close();
+	file2.open("restartvv.csv", ios::in);
 	for (int row = 0; row < LINES; row++) {
 
 		string line;
-		getline(file, line);
+		getline(file2, line);
 		stringstream iss(line);
 		string val;
-		int ii = row % 128;
-		int jj = row / 128;
+		int ii = row % (Mesh::Nx - 1);
+		int jj = row / (Mesh::Nx - 1);
 
 		getline(iss, val, ',');
 
@@ -572,6 +583,7 @@ void Flow::readRestart()
 		double inv;
 		convertor >> inv;
 		vv[ii][jj] = inv;
+		//cout << "v: " << vv[ii][jj] << endl;
 	}
 	file2.close();
 }

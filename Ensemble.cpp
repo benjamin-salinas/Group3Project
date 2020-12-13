@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include<iomanip>
+#include<sstream>
 #include "Ensemble.h"
 
 Ensemble::Ensemble(Flow* flow_)
@@ -9,6 +11,8 @@ Ensemble::Ensemble(Flow* flow_)
 	dx = flow_->dx;
 	dy = flow_->dy;
 	n_in = 0;
+
+	if (restartensemble == true) readRestart(); //uncomment to read restart data
 }
 
 Ensemble::~Ensemble()
@@ -21,11 +25,11 @@ void Ensemble::updateEnsemble()
 	srand(time(0) + rand());
 	
 	double ntemp = m_in * dt;
-	cout << "random" << ntemp << endl;
+	//cout << "random" << ntemp << endl;
 	if (ntemp < 1)
 	{
 		double ran = 1. * rand() / RAND_MAX;
-		cout << "random" << ran << endl;
+		//cout << "random" << ran << endl;
 		if (ran <= ntemp) n_in = 1;
 		else n_in = 0;
 	}
@@ -114,6 +118,59 @@ void Ensemble::writeRestart()
 	ofstream restart;
 	restart.open("restart_p.csv", ios::out);
 	for (int i = 0; i < P.size(); i++)
-		restart << P[i]->x << "," << P[i]->y << endl;
+		restart << P[i]->x << "," << P[i]->y << "," << P[i]->u << "," << P[i]->v << endl;
 	restart.close();
+}
+
+void Ensemble::readRestart()
+{
+	//count number of rows in the file
+	ifstream file;
+	file.open("restart_p.csv", ios::in);
+
+	int n = 0;
+	string temp;
+	while (getline(file, temp)) {
+		n++;
+		//cout << "temp:" << temp << endl;
+	}
+	int LINES = n;
+	cout << "n:" << LINES << endl;
+	file.close();
+	file.open("restart_p.csv", ios::in);
+	
+	for (int row = 0; row < LINES; row++) {
+
+		string line;
+		getline(file, line);
+		stringstream iss(line);
+		string val;
+
+		double tempx, tempy, tempu, tempv;
+
+		for (int col = 0; col < 4; col++) {
+
+			getline(iss, val, ',');
+
+			stringstream convertor(val);
+
+			double inv;
+			convertor >> inv;
+			if (col == 0) tempx = inv;
+			else if (col == 1) tempy = inv;
+			else if (col == 2) tempu = inv;
+			else if (col == 3) tempv = inv;
+
+			//cout << "x: " << P[row]->x << "y: " << P[row]->y << endl;
+		}
+		Particle* temp = new Particle;
+		temp->x = tempx;
+		temp->y = tempy;
+		temp->u = tempu;
+		temp->v = tempv;
+
+		P.push_back(temp);
+	}
+	cout << "size of P" << P.size() << endl;
+	file.close();
 }
