@@ -16,7 +16,7 @@ int Mesh::Nx = 128;
 int Mesh::Ny = 64;
 
 //Simulation time
-double Flow::T =2.500;
+double Flow::T = 8.000;
 
 //Time step
 double Flow::dt = 0.001;
@@ -40,7 +40,7 @@ int main()
 	while (t < Flow::T)
 	{
 		flow->updateFlow();
-		ensemble->updateEnsemble();
+		//ensemble->updateEnsemble();
 		count++;
 		ofstream fout;
 			fout.open("./post/niubility"+to_string(count)+".dat", ios::out | ios::trunc);
@@ -55,7 +55,7 @@ int main()
 						flow->pp[i][j] << endl;
 				}
 			fout.close();
-
+			/*
 			cout << "output particles number: " << ensemble->P.size() << endl;
 			ofstream pout;
 			pout.open("./post/ensemble" + to_string(count) + ".dat", ios::out | ios::trunc);
@@ -65,9 +65,14 @@ int main()
 					pout << ensemble->P[i]->x << " " << ensemble->P[i]->y << " " << ensemble->P[i]->u << " "  <<
 					ensemble->P[i]->v << endl;
 				
-			pout.close();
+			pout.close();*/
 			t += Flow::dt;
 			if ((int)(t / Flow::dt) % 1 == 0) cout << "Time: " << t << endl;
+			if ((int)(t / Flow::dt) % 200 == 0)
+			{
+				flow->writeRestart();
+				//ensemble->writeRestart();
+			}
 	}
 	
 

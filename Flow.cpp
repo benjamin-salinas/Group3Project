@@ -2,6 +2,8 @@
 #include "Flow.h"
 #include "Solver.h"
 #include <iostream>
+#include <fstream>
+#include<sstream>
 
 using namespace std;
 
@@ -82,6 +84,9 @@ Flow::Flow()
 	{
 		vstar2[j] = new double[Mesh::Nx];
 	}
+
+	//uncomment to read restart data
+	//readRestart();
 }
 
 Flow::~Flow() //Ning delete?
@@ -114,6 +119,7 @@ double Flow::u(int i_, int j_)
 	if (j_ == -1) j_ = 0;
 	if (j_ == Mesh::Ny) j_ = Mesh::Ny - 1;
 	if (i_ == Mesh::Nx + 1) i_ = Mesh::Nx - 1;
+	if (uu[i_][j_] < 0) uu[i_][j_] = 0.;
 	if (i_ == 0)
 		return exp(-(mesh->yc[j_] - 0.5) * (mesh->yc[j_] - 0.5) / R / R);
 		//return 0.01;
@@ -154,25 +160,30 @@ void Flow::updateFlow()
 		//Step 1 to get ustar and vstar
 		getustar();
 		getvstar();
+		
 		//Correct for mass conservation Ning
-		double sum1 = 0., sum2 = 0., kk;
+		double sum1 = 0., sum2 = 0., kk, mm;
 		for (int j = 0; j < Mesh::Ny; j++)
 		{
 			sum1 += ustar[0][j];
 			sum2 += ustar[Mesh::Nx][j];
 		}
 		//cout << ustar[40][0] << " " << ustar[40][63] << " " << vstar[52][1] << " " << vstar[52][62] << endl;
-		kk = sum1 - sum2;
+		//kk = sum1 - sum2;
+		mm = (sum1 + 1e-100) / (sum2 + 1e-100);
+
 		for (int j = 0; j < Mesh::Ny; j++)
 		{
+			ustar[Mesh::Nx][j] = mm * ustar[Mesh::Nx][j];
 		//ustar[Mesh::Nx][j] = kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
-			ustar[Mesh::Nx][j] = kk / Mesh::Ny + ustar[Mesh::Nx][j];
-			/*if (kk > 0)
-				ustar[Mesh::Nx][j] = kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
-			else
-				ustar[Mesh::Nx][j] = -kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];*/
+			//ustar[Mesh::Nx][j] = kk / Mesh::Ny + ustar[Mesh::Nx][j];
+			//if (kk > 0)
+			//	ustar[Mesh::Nx][j] = kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
+			//else
+			//	ustar[Mesh::Nx][j] = -kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
 		//	cout << j << " " << ustar[Mesh::Nx][j] << " " << ustar[Mesh::Nx - 1][j] << endl;
 		}
+		
 		//Step 2
 		getpp();
 
@@ -228,10 +239,11 @@ void Flow::getustar()
 		}
 		
 		//cout << rhs[0] << " " << rhs[63] << endl;
-		Solver* solver2 = new Solver;
+		Solver* solver2 = new Solver(Mesh::Ny);
 		ustar[i] = solver2->GaussElimination(diag, upper, lower, rhs, Mesh::Ny);
 		//for (int j = 0; j < Mesh::Ny; j++)
 		//	cout << j << " " << ustar[i][j] << endl;
+		//delete solver2;
 	}
 	// delete ustar2
 	delete[] lower; lower = NULL;
@@ -283,13 +295,14 @@ void Flow::getustar2()
 	//		cout << i << " " << diag[i - 1] << " " << lower[i - 1] << " " << rhsu2[i - 1] << endl;
 		}
 	
-		Solver* solver1 = new Solver;
+		Solver* solver1 = new Solver(Mesh::Nx);
 	
 		ustar2[j] = solver1->GaussElimination(diag, upper, lower, rhsu2, Mesh::Nx); //Ning
 		delete[] rhsu2; rhsu2 = NULL;
 		delete[] lower; lower = NULL;
 		delete[] diag; diag = NULL;
 		delete[] upper; upper = NULL;
+		//delete solver1;
 																				//	for (int i = 1; i <= Mesh::Nx; i++)
 //		cout << i << " " << aa[i - 1] << endl;
 	}
@@ -316,11 +329,12 @@ void Flow::getvstar()
 	for (int i = 0; i < Mesh::Nx; i++) 
 	{
 		for (int j = 0; j < Mesh::Ny - 1; j++) rhsv[j] = vstar2[j][i];	
-		Solver* solver2 = new Solver;
+		Solver* solver2 = new Solver(Mesh::Ny - 1);
 		//vstar[i] = vstar[i] + 1;
 		vstar[i] = solver2->GaussElimination(diagv, upperv, lowerv, rhsv, Mesh::Ny - 1);
 		//cout << rhs[0] << " " << rhs[62] << endl;
 		//cout << vstar[i][0] << " " << vstar[i][62] << endl;
+		//delete solver2;
 	}
 
 	
@@ -377,12 +391,13 @@ void Flow::getvstar2()  //j from 1 to Ny - 1
 				//cout << j << " " << rhsv2[i] << endl;
 		}
 
-		Solver* solver3 = new Solver;
+		Solver* solver3 = new Solver(Mesh::Nx);
 		vstar2[j] = solver3->GaussElimination(diag, upper, lower, rhsv2, Mesh::Nx);
 		delete[] rhsv2; rhsv2 = NULL;
 		delete[] lower; lower = NULL;
 		delete[] diag; diag = NULL;
 		delete[] upper; upper = NULL;
+		//delete solver3;
 	}
 }
 
@@ -390,7 +405,7 @@ void Flow::getvstar2()  //j from 1 to Ny - 1
 void Flow::getpp()
 {
 
-	Solver* solver5 = new Solver;
+	Solver* solver5 = new Solver(Mesh::Nx, Mesh::Ny);
 	double** Ae = new double* [Mesh::Nx];
 	double**  Aw = new double* [Mesh::Nx];
 	double**  As = new double* [Mesh::Nx];
@@ -433,6 +448,8 @@ void Flow::getpp()
 	delete[] An;
 	delete[] Ap;
 	delete[] rhs;
+
+	//delete solver5;
 //	for (int i = 0; i < Mesh::Nx; i++)
 	//	cout << i << " " << pp[i][0] << " " << pp[i][63] << endl;
 	//Reshape for pressure to a 2D matrix
@@ -463,4 +480,93 @@ void Flow::getvv()
 			vv[i][j] = vstar[i][j] - dt * (p(i, j) - p(i, j - 1)) / dy;
 		}
 	}
+}
+/**/
+void Flow::writeRestart()
+{
+	ofstream restartuu;
+	restartuu.open("restartuu.csv", ios::out);
+	for (int i = 0; i <= Mesh::Nx; i++)
+		for (int j = 0; j < Mesh::Ny; j++)
+		{
+			restartuu <<  uu[i][j]  << endl;
+		}
+	restartuu.close();
+
+	ofstream restartvv;
+	restartvv.open("restartvv.csv", ios::out);
+	for (int i = 0; i < Mesh::Nx; i++)
+		for (int j = 0; j <= Mesh::Ny; j++)
+		{
+			restartvv << vv[i][j] << endl;
+		}
+	restartvv.close();
+}
+
+void Flow::readRestart()
+{
+	//count number of rows in the file
+	ifstream file;
+	file.open("restartuu", ios::in);
+
+	int n = 0;
+	string temp;
+	while (getline(file, temp)) {
+		n++;
+		//cout << "temp:" << temp << endl;
+	}
+	file.close();
+	int LINES = n;
+
+	for (int row = 0; row < LINES; row++) {
+
+		string line;
+		getline(file, line);
+		stringstream iss(line);
+		string val;
+		int ii = row % 129;
+		int jj = row / 129;
+
+			getline(iss, val, ',');
+
+			stringstream convertor(val);
+
+			double inv;
+			convertor >> inv;
+			uu[ii][jj] = inv;
+	}
+	file.close();
+
+
+	//count number of rows in the file
+	ifstream file;
+	file.open("restartvv", ios::in);
+
+	int n = 0;
+	string temp;
+	while (getline(file, temp)) {
+		n++;
+		//cout << "temp:" << temp << endl;
+	}
+	file.close();
+	int LINES = n;
+
+	for (int row = 0; row < LINES; row++) {
+
+		string line;
+		getline(file, line);
+		stringstream iss(line);
+		string val;
+		int ii = row % 128;
+		int jj = row / 128;
+
+		getline(iss, val, ',');
+
+		stringstream convertor(val);
+
+		double inv;
+		convertor >> inv;
+		vv[ii][jj] = inv;
+	}
+	file.close();
 }

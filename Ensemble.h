@@ -39,6 +39,8 @@ public:
 	{
 		return exp(-(y_ - 0.5) * (y_ - 0.5) / R / R);
 	}
+
+	void writeRestart();
 };
 
 #endif

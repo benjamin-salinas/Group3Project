@@ -1,34 +1,62 @@
 #include "Solver.h"
+
+Solver::Solver(int Nx)
+{
+	ss = new double*[1];
+	ss[0] = new double[Nx];
+	for (int i = 1; i <= Nx - 1; i++) ss[0][i] = 0.;
+	ix = 1;
+	iy = Nx;
+}
+
+Solver::Solver(int Nx, int Ny)
+{
+	ss = new double* [Nx];
+	for (int i = 0; i < Nx; i++)
+	{
+		ss[i] = new double[Ny];
+		for (int j = 0; j < Ny; j++) ss[i][j] = 0.;
+	}
+	ix = Nx; iy = Ny;
+}
+
+Solver::~Solver()
+{
+	if (ix == 1)
+	{
+
+		//for (int i = 0; i < ix; i++) delete[] ss[i];
+		//delete ss;
+	}
+	else
+	{
+	//for (int i = 0; i < ix; i++) delete[] ss[i];
+	//delete[] ss;
+	}
+}
+
 double* Solver::GaussElimination(double* diag, double* upper, double* lower, double* rhs, int N)
 {
-	double* ss = new double[N];
 	for (int i = 1; i <= N - 1; i++)
 	{
 		diag[i] = diag[i] - lower[i] * upper[i - 1] / diag[i - 1];
 		rhs[i] = rhs[i] - rhs[i - 1] * lower[i] / diag[i - 1];
 	}
-	ss[N - 1] = rhs[N - 1] / diag[N - 1];
+	ss[0][N - 1] = rhs[N - 1] / diag[N - 1];
 	for (int i = N - 2; i >= 0; i--)
-		ss[i] = (rhs[i] - upper[i] * ss[i + 1]) / diag[i];
-	return ss;
+		ss[0][i] = (rhs[i] - upper[i] * ss[0][i + 1]) / diag[i];
+	return ss[0];
 }
 
 
 
 double** Solver::SOR(double** Ae, double** Aw, double** An, double** As, double** Ap, double** rhs, int Nxx, int Nyy )
 {
-	double** ss = new double* [Nxx];
 	double** ss0 = new double* [Nxx];
 	double tol = 1e-7, w = 1.8;
 	int iw, jw, ie, je, is, js, in, jn;
 	int tt = 0;
-	for(int i = 0; i < Nxx; i++)
-	{
-		ss[i] = new double [Nyy];
-		ss0[i] = new double [Nyy];
-		for(int j = 0; j < Nyy; j++)
-			ss[i][j] = 0;
-	}
+	for(int i = 0; i < Nxx; i++) ss0[i] = new double [Nyy];
 	double sum, res = 1.0;
 	while (res > tol && tt <= 100000)
 	{

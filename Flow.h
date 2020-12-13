@@ -2,6 +2,8 @@
 #define _Flow_
 #include "Mesh.h"
 
+using namespace std;
+
 class Flow
 {
 public:
@@ -42,6 +44,9 @@ public:
 	void getuu();
 	void getvv();
 	void getpp();
+
+	void writeRestart();
+	void readRestart();
 
 };
 

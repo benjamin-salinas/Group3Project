@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "Ensemble.h"
 
 Ensemble::Ensemble(Flow* flow_)
@@ -106,4 +107,13 @@ void Ensemble::particlecheck()
 		if (P[j]->x > Mesh::Lx || P[j]->y > Mesh::Ly || P[j]->y < 0. || P[j]->x < 0.)
 			P.erase(P.begin() + j);
 	}
+}
+
+void Ensemble::writeRestart()
+{
+	ofstream restart;
+	restart.open("restart_p.csv", ios::out);
+	for (int i = 0; i < P.size(); i++)
+		restart << P[i]->x << "," << P[i]->y << endl;
+	restart.close();
 }
