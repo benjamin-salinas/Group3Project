@@ -22,6 +22,8 @@ public:
 	static double T; //Simulation time
 	static double dt; //Simulation timestep
 	double alpha;
+
+	int count = 0;
 	
 public:
 	Flow();
