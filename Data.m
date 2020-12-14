@@ -9,11 +9,11 @@ y = linspace(0,1,Ny+1);
 xm = x(1:end-1)+(x(2)-x(1))/2;
 ym = y(1:end-1)+(y(2)-y(1))/2;
 
-length = 2051;
+length = 390;
 
 for i = 2:length
-    pdata = readmatrix(append('post/niubility',num2str(i,'%d'),'.dat'));
-    edata = readmatrix(append('post/ensemble',num2str(i,'%d'),'.dat'));
+    pdata = readmatrix(append('post/flow/niubility',num2str(i,'%d'),'.dat'));
+    edata = readmatrix(append('post/ensemble/ensemble',num2str(i,'%d'),'.dat'));
     
     x = reshape(pdata(:,1),[Nx,Ny]);
     y = reshape(pdata(:,2),[Nx,Ny]);

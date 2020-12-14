@@ -8,11 +8,11 @@ using namespace std;
 
 /* Initialization of basic parameters */
 //Scale of the domain [m]
-double Mesh::Lx = 4.;
+double Mesh::Lx = 2.;
 double Mesh::Ly = 1.;
 
 //Number of cells at each dimension
-int Mesh::Nx = 256;
+int Mesh::Nx = 128;
 int Mesh::Ny = 64;
 
 //Simulation time
@@ -31,15 +31,15 @@ double Ensemble::St = 1.;
 double Ensemble::m_in = 1000;
 
 //switch to read restart data
-bool Flow::restartflow = false;
-bool Ensemble::restartensemble = false;
+bool Flow::restartflow = true;
+bool Ensemble::restartensemble = true;
 
 int main()
 {
 	Flow* flow = new Flow;
 	Ensemble* ensemble = new Ensemble(flow);
 
-	double t = 0.; //restart time
+	double t = 0.2; //restart time
 	int count = (int)(t/Flow::dt);
 	cout << "count: " << count << endl;
 	while (t < Flow::T)

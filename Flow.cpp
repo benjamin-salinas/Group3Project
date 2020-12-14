@@ -556,8 +556,8 @@ void Flow::readRestart()
 		stringstream iss(line);
 		string val;
 		
-		int ii = row % Mesh::Nx;
-		int jj = row / Mesh::Nx;
+		int ii = row % (Mesh::Nx + 1);
+		int jj = row / (Mesh::Nx + 1);
 		
 			getline(iss, val, ',');
 
@@ -591,8 +591,8 @@ void Flow::readRestart()
 		getline(file2, line);
 		stringstream iss(line);
 		string val;
-		int ii = row % (Mesh::Nx - 1);
-		int jj = row / (Mesh::Nx - 1);
+		int ii = row % Mesh::Nx;
+		int jj = row / Mesh::Nx;
 
 		getline(iss, val, ',');
 
@@ -624,8 +624,8 @@ void Flow::readRestart()
 		getline(filehx, line);
 		stringstream iss(line);
 		string val;
-		int ii = row % (Mesh::Nx - 1);
-		int jj = row / (Mesh::Nx - 1);
+		int ii = row % Mesh::Nx;
+		int jj = row / Mesh::Nx;
 
 		getline(iss, val, ',');
 
@@ -657,8 +657,8 @@ void Flow::readRestart()
 		getline(filehy, line);
 		stringstream iss(line);
 		string val;
-		int ii = row % (Mesh::Nx - 1);
-		int jj = row / (Mesh::Nx - 1);
+		int ii = row % Mesh::Nx;
+		int jj = row / Mesh::Nx;
 
 		getline(iss, val, ',');
 
