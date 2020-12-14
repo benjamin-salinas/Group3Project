@@ -498,8 +498,8 @@ void Flow::writeRestart()
 {
 	ofstream restartuu;
 	restartuu.open("restartuu.csv", ios::out);
-	for (int i = 0; i <= Mesh::Nx; i++)
-		for (int j = 0; j < Mesh::Ny; j++)
+	for (int j = 0; j < Mesh::Ny; j++)
+		for (int i = 0; i <= Mesh::Nx; i++)
 		{
 			restartuu  << uu[i][j] << endl;
 		}
@@ -507,8 +507,8 @@ void Flow::writeRestart()
 
 	ofstream restartvv;
 	restartvv.open("restartvv.csv", ios::out);
-	for (int i = 0; i < Mesh::Nx; i++)
-		for (int j = 0; j <= Mesh::Ny; j++)
+	for (int j = 0; j <= Mesh::Ny; j++)
+		for (int i = 0; i < Mesh::Nx; i++)
 		{
 			restartvv << vv[i][j] << endl;
 		}
