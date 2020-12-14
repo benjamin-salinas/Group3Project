@@ -53,7 +53,7 @@ double* Solver::GaussElimination(double* diag, double* upper, double* lower, dou
 double** Solver::SOR(double** Ae, double** Aw, double** An, double** As, double** Ap, double** rhs, int Nxx, int Nyy )
 {
 	double** ss0 = new double* [Nxx];
-	double tol = 1e-7, w = 1.8;
+	double tol = 1e-7, w = 1.85;
 	int iw, jw, ie, je, is, js, in, jn;
 	int tt = 0;
 	for(int i = 0; i < Nxx; i++) ss0[i] = new double [Nyy];

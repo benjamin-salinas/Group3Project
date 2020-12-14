@@ -123,7 +123,7 @@ double Flow::u(int i_, int j_)
 	if (j_ == Mesh::Ny) j_ = Mesh::Ny - 1;
 	if (i_ == Mesh::Nx + 1) i_ = Mesh::Nx - 1;
 	//if (uu[i_][j_] < 0) uu[i_][j_] = 0.;
-	if (uu[i_][j_] > 2) uu[i_][j_] = 1.1;
+	//if (uu[i_][j_] > 2) uu[i_][j_] = 1.1;
 	if (i_ == 0)
 		return exp(-(mesh->yc[j_] - 0.5) * (mesh->yc[j_] - 0.5) / R / R);
 		//return 0.01;
@@ -497,7 +497,7 @@ void Flow::getvv()
 void Flow::writeRestart()
 {
 	ofstream restartuu;
-	restartuu.open("restartuu.csv", ios::out);
+	restartuu.open("./restart/restartuu.csv", ios::out);
 	for (int j = 0; j < Mesh::Ny; j++)
 		for (int i = 0; i <= Mesh::Nx; i++)
 		{
@@ -506,20 +506,38 @@ void Flow::writeRestart()
 	restartuu.close();
 
 	ofstream restartvv;
-	restartvv.open("restartvv.csv", ios::out);
+	restartvv.open("./restart/restartvv.csv", ios::out);
 	for (int j = 0; j <= Mesh::Ny; j++)
 		for (int i = 0; i < Mesh::Nx; i++)
 		{
 			restartvv << vv[i][j] << endl;
 		}
 	restartvv.close();
+
+	ofstream restarthx;
+	restarthx.open("./restart/restarthx.csv", ios::out);
+	for (int j = 0; j < Mesh::Ny; j++)
+		for (int i = 0; i < Mesh::Nx; i++)
+		{
+			restarthx << Hx[i][j] << endl;
+		}
+	restarthx.close();
+
+	ofstream restarthy;
+	restarthy.open("./restart/restarthy.csv", ios::out);
+	for (int j = 0; j < Mesh::Ny-1; j++)
+		for (int i = 0; i < Mesh::Nx; i++)
+		{
+			restarthy << Hy[i][j] << endl;
+		}
+	restarthy.close();
 }
 
 void Flow::readRestart()
 {
 	//count number of rows in the file
 	ifstream file;
-	file.open("restartuu.csv", ios::in);
+	file.open("./restart/restartuu.csv", ios::in);
 
 	int n = 0;
 	string temp;
@@ -530,7 +548,7 @@ void Flow::readRestart()
 	int LINES = n;
 	cout << "n:" << LINES << endl;
 	file.close();
-	file.open("restartuu.csv", ios::in);
+	file.open("./restart/restartuu.csv", ios::in);
 	for (int row = 0; row < LINES; row++) {
 
 		string line;
@@ -556,7 +574,7 @@ void Flow::readRestart()
 
 	//count number of rows in the file
 	ifstream file2;
-	file2.open("restartvv.csv", ios::in);
+	file2.open("./restart/restartvv.csv", ios::in);
 
 	n = 0;
 	string temp2;
@@ -566,7 +584,7 @@ void Flow::readRestart()
 	}
 	LINES = n;
 	file2.close();
-	file2.open("restartvv.csv", ios::in);
+	file2.open("./restart/restartvv.csv", ios::in);
 	for (int row = 0; row < LINES; row++) {
 
 		string line;
@@ -586,4 +604,70 @@ void Flow::readRestart()
 		//cout << "v: " << vv[ii][jj] << endl;
 	}
 	file2.close();
+
+	//count number of rows in the file
+	ifstream filehx;
+	filehx.open("./restart/restarthx.csv", ios::in);
+
+	n = 0;
+	string temp5;
+	while (getline(filehx, temp5)) {
+		n++;
+		//cout << "temp:" << temp << endl;
+	}
+	LINES = n;
+	filehx.close();
+	filehx.open("./restart/restarthx.csv", ios::in);
+	for (int row = 0; row < LINES; row++) {
+
+		string line;
+		getline(filehx, line);
+		stringstream iss(line);
+		string val;
+		int ii = row % (Mesh::Nx - 1);
+		int jj = row / (Mesh::Nx - 1);
+
+		getline(iss, val, ',');
+
+		stringstream convertor(val);
+
+		double inv;
+		convertor >> inv;
+		Hx[ii][jj] = inv;
+		//cout << "v: " << vv[ii][jj] << endl;
+	}
+	filehx.close();
+
+	//count number of rows in the file
+	ifstream filehy;
+	filehy.open("./restart/restarthy.csv", ios::in);
+
+	n = 0;
+	string temp6;
+	while (getline(filehy, temp6)) {
+		n++;
+		//cout << "temp:" << temp << endl;
+	}
+	LINES = n;
+	filehy.close();
+	filehy.open("./restart/restarthy.csv", ios::in);
+	for (int row = 0; row < LINES; row++) {
+
+		string line;
+		getline(filehy, line);
+		stringstream iss(line);
+		string val;
+		int ii = row % (Mesh::Nx - 1);
+		int jj = row / (Mesh::Nx - 1);
+
+		getline(iss, val, ',');
+
+		stringstream convertor(val);
+
+		double inv;
+		convertor >> inv;
+		Hy[ii][jj] = inv;
+		//cout << "v: " << vv[ii][jj] << endl;
+	}
+	filehy.close();
 }

@@ -40,7 +40,8 @@ int main()
 	Ensemble* ensemble = new Ensemble(flow);
 
 	double t = 0.; //restart time
-	int count = (int)t/Flow::dt;
+	int count = (int)(t/Flow::dt);
+	cout << "count: " << count << endl;
 	while (t < Flow::T)
 	{
 		flow->updateFlow();
@@ -74,7 +75,7 @@ int main()
 			pout.close();
 			t += Flow::dt;
 			if ((int)(t / Flow::dt) % 1 == 0) cout << "Time: " << t << endl;
-			if ((int)(t / Flow::dt) % 200 == 0)
+			if (((int)(t / Flow::dt)) % 200 == 0)
 			{
 				flow->writeRestart();
 				ensemble->writeRestart();
