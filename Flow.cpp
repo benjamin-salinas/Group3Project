@@ -122,7 +122,7 @@ double Flow::u(int i_, int j_)
 	if (j_ == -1) j_ = 0;
 	if (j_ == Mesh::Ny) j_ = Mesh::Ny - 1;
 	if (i_ == Mesh::Nx + 1) i_ = Mesh::Nx - 1;
-	//if (uu[i_][j_] < 0) uu[i_][j_] = 0.;
+	if (uu[i_][j_] < 0) uu[i_][j_] = 0.;
 	//if (uu[i_][j_] > 2) uu[i_][j_] = 1.1;
 	if (i_ == 0)
 		return exp(-(mesh->yc[j_] - 0.5) * (mesh->yc[j_] - 0.5) / R / R);
@@ -161,14 +161,18 @@ double Flow::p(int i_, int j_)
 
 void Flow::updateFlow()
 {
+	clock_t time1, time2, time3, time4;
 		//Step 1 to get ustar and vstar
+
+	time1 = clock();
 		getustar();
 		getvstar();
 		count++;
 		
+
 		//Correct for mass conservation Ning
 		double sum1 = 0., sum2 = 0., kk, mm;
-		L2_D = 0.;
+		L2_D = 0.; L2_u = 0.;
 			for (int j = 0; j < Mesh::Ny; j++)
 			{
 				sum1 += ustar[0][j];
@@ -188,20 +192,30 @@ void Flow::updateFlow()
 				//	ustar[Mesh::Nx][j] = -kk * ustar[0][j] / sum1 + ustar[Mesh::Nx][j];
 			//	cout << j << " " << ustar[Mesh::Nx][j] << " " << ustar[Mesh::Nx - 1][j] << endl;
 			}
-		
+		time2 = clock();
+		step1 = (double)(time2 - time1) / CLOCKS_PER_SEC;
 		
 		
 		//Step 2
 		getpp();
+		time3 = clock();
+		step2 = (double)(time3 - time2) / CLOCKS_PER_SEC;
 
 		//Step 3
 		getuu();
 		getvv();
+		time4 = clock();
+		step3 = (double)(time4 - time3) / CLOCKS_PER_SEC;
 
 		for (int i = 0; i < Mesh::Nx; i++)
 			for (int j = 0; j < Mesh::Ny; j++)
+			{
 				L2_D = L2_D + ((uu[i + 1][j] - uu[i][j]) / dx + (vv[i][j + 1] - vv[i][j]) / dy) *
 				((uu[i + 1][j] - uu[i][j]) / dx + (vv[i][j + 1] - vv[i][j]) / dy);
+				L2_u = L2_u + ((uu[i + 1][j] - uu[i][j]) / dx) * ((uu[i + 1][j] - uu[i][j]) / dx);
+
+			}
+				
 		cout << "L2 norm " << sqrt(L2_D) << endl;
 }
 

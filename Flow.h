@@ -25,8 +25,13 @@ public:
 
 	int count = 0;
 	double L2_D;
+	double L2_u;
 
 	static bool restartflow; //switch to use restart data
+
+	double step1;
+	double step2;
+	double step3;
 	
 public:
 	Flow();

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include "Ensemble.h"
+#include <time.h>
 
 using namespace std;
 
@@ -22,7 +23,7 @@ double Flow::T = 60.000;
 double Flow::dt = 0.001;
 
 //Reynold number
-double Flow::Re = 10000.;
+double Flow::Re = 1000;
 
 //Stokes number
 double Ensemble::St = 1.;
@@ -31,21 +32,28 @@ double Ensemble::St = 1.;
 double Ensemble::m_in = 1000;
 
 //switch to read restart data
-bool Flow::restartflow = true;
-bool Ensemble::restartensemble = true;
+bool Flow::restartflow = false;
+bool Ensemble::restartensemble = false;
 
 int main()
 {
+	clock_t startu, startp, startr, endtime;
 	Flow* flow = new Flow;
 	Ensemble* ensemble = new Ensemble(flow);
 
-	double t = 0.2; //restart time
+	double t = 0.; //restart time
 	int count = (int)(t/Flow::dt);
 	cout << "count: " << count << endl;
 	while (t < Flow::T)
 	{
+		startu = clock();
 		flow->updateFlow();
+		startp = clock();
+		double flowtime = (double)(startp - startu) / CLOCKS_PER_SEC;
 		ensemble->updateEnsemble();
+		startr = clock();
+		double ensembletime = (double)(startr - startp) / CLOCKS_PER_SEC;
+		
 		count++;
 		//output flow data
 		ofstream fout;
@@ -85,8 +93,19 @@ int main()
 			ofstream lout;
 			lout.open("./post/lnorm.dat", ios::app);
 			//lout << "VARIABLES = \"L2\"" << endl;
-			lout << sqrt(flow->L2_D) << endl;
+			lout << t << " " <<sqrt(flow->L2_D)<< " "<< sqrt(flow->L2_u) << endl;
 			lout.close();
+
+			endtime = clock();
+
+			double writetime = (double)(endtime - startr) / CLOCKS_PER_SEC;
+			ofstream timeout;
+			timeout.open("./post/clocktick.dat", ios::app);
+			//timeout << "VARIABLES = \"TIME\", \"FLOW\", \"ENSEMBLE\", \"WRITE\"" << endl;
+			timeout << t << " " << flowtime << " " << ensembletime << " " << writetime <<
+				" " << flow->step1 << " " << flow->step2 << " " << flow->step3 << endl;
+			timeout.close();
+
 	}
 	
 
