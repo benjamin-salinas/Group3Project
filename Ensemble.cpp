@@ -12,7 +12,7 @@ Ensemble::Ensemble(Flow* flow_)
 	dy = flow_->dy;
 	n_in = 0;
 
-	if (restartensemble == true) readRestart(); //uncomment to read restart data
+	if (restartensemble == true) readRestart(); 
 }
 
 Ensemble::~Ensemble()
@@ -23,13 +23,11 @@ Ensemble::~Ensemble()
 void Ensemble::updateEnsemble()
 {
 	srand(time(0) + rand());
-	
+	//Generate number of particles inserted in the domain at each timestep
 	double ntemp = m_in * dt;
-	//cout << "random" << ntemp << endl;
 	if (ntemp < 1)
 	{
 		double ran = 1. * rand() / RAND_MAX;
-		//cout << "random" << ran << endl;
 		if (ran <= ntemp) n_in = 1;
 		else n_in = 0;
 	}
@@ -37,7 +35,7 @@ void Ensemble::updateEnsemble()
 	particleinsert();
 	Runge_Kutta_explicit();
 	particlecheck();
-	//cout << "current particles number: " << P.size() << endl;
+
 }
 
 void Ensemble::particleinsert()
@@ -130,10 +128,7 @@ void Ensemble::readRestart()
 
 	int n = 0;
 	string temp;
-	while (getline(file, temp)) {
-		n++;
-		//cout << "temp:" << temp << endl;
-	}
+	while (getline(file, temp)) n++;	
 	int LINES = n;
 	cout << "n:" << LINES << endl;
 	file.close();
@@ -160,8 +155,6 @@ void Ensemble::readRestart()
 			else if (col == 1) tempy = inv;
 			else if (col == 2) tempu = inv;
 			else if (col == 3) tempv = inv;
-
-			//cout << "x: " << P[row]->x << "y: " << P[row]->y << endl;
 		}
 		Particle* temp = new Particle;
 		temp->x = tempx;
@@ -171,6 +164,5 @@ void Ensemble::readRestart()
 
 		P.push_back(temp);
 	}
-	cout << "size of P" << P.size() << endl;
 	file.close();
 }
